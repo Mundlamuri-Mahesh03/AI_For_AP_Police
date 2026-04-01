@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  OFFICER
+}
+
+enum UnitType {
+  ZONE
+  RANGE
+  DISTRICT
+  CIRCLE
+  SDPO
+  PS
+  COMMISSIONERATE
+  CPO
+  DCPO
+  ACPO
+}
+
+model PoliceUnit {
+  id             Int          @id @default(autoincrement())
+  ministry       String?
+  name           String
+  code           String       @unique
+  legacyRef      String?
+  type           UnitType
+  department     String?
+  isVirtual      Boolean      @default(false)
+  parentId       Int?
+  parent         PoliceUnit?  @relation("PoliceUnitHierarchy", fields: [parentId], references: [id])
+  children       PoliceUnit[] @relation("PoliceUnitHierarchy")
+  parentUnitCode String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  users          User[]
+
+  @@index([parentId])
+  @@index([type])
+  @@index([code])
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  name         String
+  email        String     @unique
+  passwordHash String
+  role         Role       @default(OFFICER)
+  policeUnitId Int
+  policeUnit   PoliceUnit @relation(fields: [policeUnitId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
