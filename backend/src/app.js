@@ -8,7 +8,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN?.split(",") || "*"
+    origin:"*"
   })
 );
 app.use(express.json());
